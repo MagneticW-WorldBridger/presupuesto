@@ -77,9 +77,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 /* SHEET */
 .scrim{position:fixed;inset:0;z-index:70;background:hsl(var(--sh)/.68);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center}
 .scrim.on{display:flex}
-.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
+.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;overscroll-behavior:contain;will-change:transform}
 .scrim.on .sheet{transform:translateY(0)}
-.grab{width:42px;height:5px;border-radius:3px;background:hsl(38 12% 42%/.5);margin:0 auto 16px}
+.grab{width:46px;height:5px;border-radius:3px;background:hsl(38 12% 42%/.55);margin:0 auto 14px;touch-action:none;padding:8px 40px;background-clip:content-box;box-sizing:content-box}
+.sheet.dragging{transition:none;-webkit-user-select:none;user-select:none}
 .sheet h3{font-family:'Cormorant Garamond';font-weight:700;font-size:1.7rem;margin-bottom:3px}
 .sheet .lead{font-size:.79rem;color:var(--mute);margin-bottom:15px;line-height:1.45}
 .amtin{width:100%;font-family:'Cormorant Garamond';font-weight:700;font-size:2.9rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:17px;padding:15px;box-shadow:var(--sunk);text-align:center;outline:none;margin-bottom:13px}
@@ -185,7 +186,7 @@ function snack(msg){ const s=document.getElementById('snack'); s.querySelector('
 function undo(){ if(lastAction){ lastAction(); lastAction=null; save(); render(); } document.getElementById('snack').classList.remove('on'); haptic(10); }
 /* ENTRY */
 function sh(html){ document.getElementById("sheet").innerHTML='<div class="grab"></div>'+html; document.getElementById("scrim").classList.add("on"); }
-function closeSheet(){ document.getElementById("scrim").classList.remove("on"); }
+function closeSheet(){ document.getElementById("scrim").classList.remove("on"); const s=document.getElementById('sheet'); s.classList.remove('dragging'); s.style.transform=''; }
 function catChips(){ return S.cats.map((c,i)=>`<span class="chip ${i===gCat?'on':''}" onclick="gCat=${i};document.getElementById('chs').innerHTML=catChips()">${c.e||''} ${c.n}</span>`).join(""); }
 function gastoSheet(i){ gCat=(typeof i==="number")?i:(S.lastCat||0); gAcc=S.lastAcc||"cash";
   sh(`<h3>¿Cuánto gastaste?</h3><div class="lead">Baja el saldo de la cuenta que elijas. No es retiro — es gasto real.</div>
@@ -227,6 +228,30 @@ function addCatRow(){ S.cats.push({e:"🙂",n:"Nueva",s:0,cap:0}); save(); manag
 /* BACKUP */
 function backup(){ const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="mi-dinero-respaldo.json"; document.body.appendChild(a); a.click(); a.remove(); }
 function restore(){ const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json"; inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d&&d.cats){S=d;save();render();}else alert("Archivo inválido");}catch(x){alert("No se pudo leer");}};r.readAsText(f);}; inp.click(); }
+/* DRAG-DOWN-TO-DISMISS (vaul-distilled, iOS-safe) */
+function initSheetDrag(){
+  const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
+  let startY=0,lastY=0,lastT=0,vel=0,drag=false,pending=false;
+  const dampen=v=>8*Math.log(Math.abs(v)+1);
+  function start(y){ if(!scrim.classList.contains('on'))return; startY=lastY=y; lastT=performance.now(); vel=0; drag=false; pending=true; }
+  function move(y,e){
+    if(pending){ const d=y-startY; if(Math.abs(d)<6)return;
+      if(d>0&&sheet.scrollTop<=0){ drag=true; pending=false; sheet.classList.add('dragging'); }
+      else { pending=false; return; } }
+    if(!drag)return;
+    let d=y-startY; const now=performance.now(),dt=now-lastT||1; vel=(y-lastY)/dt; lastY=y; lastT=now;
+    if(d<0)d=-dampen(d); sheet.style.transform='translateY('+d+'px)';
+    if(e&&e.cancelable)e.preventDefault();
+  }
+  function end(){ pending=false; if(!drag)return; drag=false; sheet.classList.remove('dragging');
+    const h=sheet.getBoundingClientRect().height||1, frac=(lastY-startY)/h;
+    if(frac>0.25||vel>0.4){ sheet.style.transform='translateY(100%)'; haptic(10); setTimeout(closeSheet,330); }
+    else { sheet.style.transform=''; } }
+  sheet.addEventListener('touchstart',e=>start(e.touches[0].clientY),{passive:true});
+  window.addEventListener('touchmove',e=>{ if(pending||drag) move(e.touches[0].clientY,e); },{passive:false});
+  window.addEventListener('touchend',end); window.addEventListener('touchcancel',end);
+}
+initSheetDrag();
 render();
 </script>
 </body>
