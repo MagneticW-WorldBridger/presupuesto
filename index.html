@@ -77,7 +77,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 /* SHEET */
 .scrim{position:fixed;inset:0;z-index:70;background:hsl(var(--sh)/.68);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center}
 .scrim.on{display:flex}
-.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.7,.2,1);max-height:90vh;overflow-y:auto}
+.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
 .scrim.on .sheet{transform:translateY(0)}
 .grab{width:42px;height:5px;border-radius:3px;background:hsl(38 12% 42%/.5);margin:0 auto 16px}
 .sheet h3{font-family:'Cormorant Garamond';font-weight:700;font-size:1.7rem;margin-bottom:3px}
@@ -101,12 +101,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 .mrow .x{color:var(--clay);font-size:.78rem;padding:6px}
 .reveal{opacity:0;transform:translateY(12px);animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards}
 @keyframes rise{to{opacity:1;transform:none}}
+.snack{position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);z-index:60;display:flex;align-items:center;gap:14px;background:hsl(28 18% 17%);color:var(--cream);padding:12px 14px 12px 18px;border-radius:16px;box-shadow:0 12px 32px hsl(var(--sh)/.6),inset 0 1px 0 hsl(var(--hi)/.08);font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.snack.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.snack button{background:none;border:none;color:var(--golds);font-weight:700;font-size:.86rem;cursor:pointer;font-family:inherit;padding:4px 2px}
+.pv.neg{color:var(--clay)}
+.qa{display:flex;gap:8px;margin-bottom:13px}
+.qchip{flex:1;text-align:center;font-size:.88rem;font-weight:600;color:var(--golds);padding:11px;border-radius:12px;background:var(--ink-s);box-shadow:var(--sunk);cursor:pointer;transition:transform .12s}
+.qchip:active{transform:scale(.94)}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <div class="grain"></div>
 <div class="wrap" id="app"></div>
 <button class="fab" onclick="gastoSheet()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Gasto</button>
+<div class="snack" id="snack"><span class="sm"></span><button onclick="undo()">Deshacer</button></div>
 <div class="scrim" id="scrim" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
 <script>
 const KEY="miDinero";
@@ -139,9 +148,9 @@ function render(){
   let h="";
   // HERO
   h+=`<div class="hero reveal"><div class="hl"><div class="k">Gastado en ${MES}</div>
-    <div class="hn tnum">${m(spent)}</div><div class="hs">Tienes ${m(S.bank+S.cash)} en total</div></div>
+    <div class="hn tnum" id="n_spent">${m(spent)}</div><div class="hs">Tienes ${m(S.bank+S.cash)} en total</div></div>
     <div class="ring"><svg width="84" height="84"><circle cx="42" cy="42" r="36" stroke="hsl(28 30% 6%)" stroke-width="7" fill="none"/>
-      <circle cx="42" cy="42" r="36" stroke="url(#g)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+      <circle id="ringFg" cx="42" cy="42" r="36" stroke="url(#g)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
       <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(36 46% 40%)"/><stop offset="1" stop-color="hsl(40 58% 72%)"/></linearGradient></defs></svg>
       <div class="rc">${Math.round(pct)}%</div></div></div>`;
   // LAPTOP
@@ -154,8 +163,8 @@ function render(){
   h+=`</div>`;
   // PILLS
   h+=`<div class="pills reveal" style="animation-delay:.04s">
-    <div class="pill" onclick="bankSheet()"><span class="pe">🏦</span><div><div class="pk">Banco</div><div class="pv tnum">${m(S.bank)}</div></div></div>
-    <div class="pill" onclick="cashSheet()"><span class="pe">💵</span><div><div class="pk">Efectivo</div><div class="pv tnum">${m(S.cash)}</div></div></div></div>`;
+    <div class="pill" onclick="bankSheet()"><span class="pe">🏦</span><div><div class="pk">Banco</div><div class="pv tnum ${S.bank<0?'neg':''}" id="n_bank">${m(S.bank)}</div></div></div>
+    <div class="pill" onclick="cashSheet()"><span class="pe">💵</span><div><div class="pk">Efectivo</div><div class="pv tnum ${S.cash<0?'neg':''}" id="n_cash">${m(S.cash)}</div></div></div></div>`;
   // GRID
   h+=`<div class="grid reveal" style="animation-delay:.08s">`;
   S.cats.forEach((c,i)=>{ const p=c.cap>0?Math.min(100,c.s/c.cap*100):0, over=c.s>c.cap&&c.cap>0;
@@ -163,31 +172,44 @@ function render(){
       <div class="ta tnum">${m(c.s)}</div>${c.cap>0?`<div class="tb"><div class="tf ${over?'over':''}" style="width:${p}%"></div></div>`:''}</div>`; });
   h+=`<div class="tile add" onclick="manageSheet()"><span>＋</span></div></div>`;
   h+=`<div class="tools"><span class="g" onclick="manageSheet()">editar categorías</span><span onclick="backup()">respaldar</span><span onclick="restore()">restaurar</span></div>`;
-  document.getElementById("app").innerHTML=h;
+  document.getElementById("app").innerHTML=h; animateNums();
 }
+/* PREMIUM POLISH */
+let PREV={spent:null,bank:null,cash:null}, lastAction=null, snackT=null;
+const RM=()=>window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function haptic(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+function countUp(el,from,to,dur){ if(RM()||from===to){ el.textContent=m(to); return; } const s=performance.now(),ez=t=>1-Math.pow(1-t,3); function tk(ts){ const t=Math.min((ts-s)/dur,1); el.textContent=m(from+(to-from)*ez(t)); if(t<1)requestAnimationFrame(tk); else el.textContent=m(to);} requestAnimationFrame(tk); }
+function animateNums(){ const tg={spent:totS(),bank:S.bank,cash:S.cash}; for(const k in tg){ const el=document.getElementById('n_'+k); if(!el)continue; const from=PREV[k]==null?(k==='spent'?0:tg[k]):PREV[k]; countUp(el,from,tg[k],700); PREV[k]=tg[k]; }
+  const fg=document.getElementById('ringFg'); if(fg){ const C=2*Math.PI*36, pct=totCap()>0?Math.min(1,totS()/totCap()):0; if(RM()){fg.style.strokeDashoffset=C*(1-pct);return;} fg.style.transition='none'; fg.style.strokeDashoffset=C; requestAnimationFrame(()=>{ fg.style.transition='stroke-dashoffset .8s cubic-bezier(.2,.7,.2,1)'; fg.style.strokeDashoffset=C*(1-pct); }); } }
+function snack(msg){ const s=document.getElementById('snack'); s.querySelector('.sm').textContent=msg; s.classList.add('on'); clearTimeout(snackT); snackT=setTimeout(()=>s.classList.remove('on'),5000); }
+function undo(){ if(lastAction){ lastAction(); lastAction=null; save(); render(); } document.getElementById('snack').classList.remove('on'); haptic(10); }
 /* ENTRY */
 function sh(html){ document.getElementById("sheet").innerHTML='<div class="grab"></div>'+html; document.getElementById("scrim").classList.add("on"); }
 function closeSheet(){ document.getElementById("scrim").classList.remove("on"); }
 function catChips(){ return S.cats.map((c,i)=>`<span class="chip ${i===gCat?'on':''}" onclick="gCat=${i};document.getElementById('chs').innerHTML=catChips()">${c.e||''} ${c.n}</span>`).join(""); }
-function gastoSheet(i){ gCat=(typeof i==="number")?i:0; gAcc=S.lastAcc||"cash";
+function gastoSheet(i){ gCat=(typeof i==="number")?i:(S.lastCat||0); gAcc=S.lastAcc||"cash";
   sh(`<h3>¿Cuánto gastaste?</h3><div class="lead">Baja el saldo de la cuenta que elijas. No es retiro — es gasto real.</div>
     <input class="amtin tnum" id="gAmt" type="number" inputmode="decimal" placeholder="$0">
+    <div class="qa">${[100,200,500,1000].map(a=>`<span class="qchip" onclick="qa(${a})">+$${a}</span>`).join("")}</div>
     <div class="seg"><button id="sgC" class="${gAcc==='cash'?'on':''}" onclick="gAcc='cash';segUp()">💵 Efectivo</button><button id="sgB" class="${gAcc==='bank'?'on':''}" onclick="gAcc='bank';segUp()">🏦 Banco</button></div>
     <div class="chips" id="chs">${catChips()}</div>
     <button class="btn" onclick="addGasto()">Guardar gasto</button><button class="btn ghost" onclick="closeSheet()">Cancelar</button>`);
   setTimeout(()=>{const e=document.getElementById("gAmt");if(e)e.focus();},320);
 }
-function segUp(){ document.getElementById("sgC").className=gAcc==='cash'?'on':''; document.getElementById("sgB").className=gAcc==='bank'?'on':''; }
+function qa(a){ const e=document.getElementById("gAmt"); e.value=(+e.value||0)+a; haptic(8); }
+function segUp(){ document.getElementById("sgC").className=gAcc==='cash'?'on':''; document.getElementById("sgB").className=gAcc==='bank'?'on':''; haptic(6); }
 function addGasto(){ const v=+document.getElementById("gAmt").value; if(!v||v<=0){closeSheet();return;}
-  S.cats[gCat].s=(+S.cats[gCat].s||0)+v; if(gAcc==='bank')S.bank-=v; else S.cash-=v; S.lastAcc=gAcc; save(); closeSheet(); render(); }
-function buy(k){ if(S.laptopPagada){ if(S.laptop===k){ S.bank+=S.opciones[k][1]; S.laptopPagada=false; S.laptop="no"; } } else { S.bank-=S.opciones[k][1]; S.laptopPagada=true; S.laptop=k; } save(); render(); }
+  const i=gCat, acc=gAcc; S.cats[i].s=(+S.cats[i].s||0)+v; if(acc==='bank')S.bank-=v; else S.cash-=v; S.lastAcc=acc; S.lastCat=i;
+  lastAction=()=>{ S.cats[i].s-=v; if(acc==='bank')S.bank+=v; else S.cash+=v; };
+  save(); closeSheet(); render(); haptic(S.cats[i].cap>0&&S.cats[i].s>S.cats[i].cap?[0,45]:12); snack(`${m(v)} en ${S.cats[i].n}`); }
+function buy(k){ if(S.laptopPagada){ if(S.laptop===k){ S.bank+=S.opciones[k][1]; S.laptopPagada=false; S.laptop="no"; lastAction=null; } } else { const pr=S.opciones[k][1]; S.bank-=pr; S.laptopPagada=true; S.laptop=k; lastAction=()=>{S.bank+=pr;S.laptopPagada=false;S.laptop="no";}; haptic([0,45]); snack(`Compraste la ${k==='pro'?'16" Pro':'14" M5'}`); } save(); render(); }
 /* ACCOUNTS */
 function bankSheet(){ sh(`<h3>Banco · ${m(S.bank)}</h3><div class="lead">Retirar pasa dinero a tu efectivo (no es un gasto). O ajusta el saldo.</div>
   <div class="fld"><input id="wd" type="number" inputmode="decimal" style="flex:1" placeholder="Retirar a efectivo $"></div>
   <button class="btn" onclick="withdraw()">Retirar a efectivo</button>
   <div class="fld" style="margin-top:14px"><input id="bb" type="number" inputmode="decimal" style="flex:1" value="${S.bank}" placeholder="Saldo banco"></div>
   <button class="btn sec" onclick="setBank()">Ajustar saldo banco</button><button class="btn ghost" onclick="closeSheet()">Cerrar</button>`); }
-function withdraw(){ const v=+document.getElementById("wd").value; if(v>0){ S.bank-=v; S.cash+=v; S.lastAcc="cash"; save(); } closeSheet(); render(); }
+function withdraw(){ const v=+document.getElementById("wd").value; if(v>0){ S.bank-=v; S.cash+=v; S.lastAcc="cash"; lastAction=()=>{S.bank+=v;S.cash-=v;}; save(); closeSheet(); render(); haptic(12); snack(`Retiraste ${m(v)} a efectivo`); return; } closeSheet(); render(); }
 function setBank(){ const v=+document.getElementById("bb").value; if(!isNaN(v)){S.bank=v;save();} closeSheet(); render(); }
 function cashSheet(){ sh(`<h3>Efectivo · ${m(S.cash)}</h3><div class="lead">Ajusta tu efectivo en mano (para cuadrar con tu cartera real).</div>
   <div class="fld"><input id="cc" type="number" inputmode="decimal" style="flex:1" value="${S.cash}" placeholder="Efectivo en mano"></div>
