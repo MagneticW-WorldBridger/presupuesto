@@ -177,7 +177,7 @@ function render(){
     h+=`<div class="tile" onclick="gastoSheet(${i})"><div class="te">${c.e||'•'}</div><div class="tn">${c.n}</div>
       <div class="ta tnum">${m(c.s)}</div>${c.cap>0?`<div class="tb"><div class="tf ${over?'over':''}" style="width:${p}%"></div></div>`:''}</div>`; });
   h+=`<div class="tile add" onclick="manageSheet()"><span>＋</span></div></div>`;
-  h+=`<div class="tools"><span class="g" onclick="movimientos()">movimientos</span><span onclick="manageSheet()">categorías</span><span onclick="backup()">respaldar</span><span onclick="restore()">restaurar</span><span onclick="if(confirm('¿Reiniciar todo a cero?')){localStorage.removeItem(KEY);S=load();render();}">reiniciar</span></div>`;
+  h+=`<div class="tools"><span class="g" onclick="movimientos()">movimientos</span><span onclick="manageSheet()">categorías</span><span onclick="if(confirm('¿Reiniciar todo a cero?')){localStorage.removeItem(KEY);S=load();render();}">reiniciar</span></div>`;
   document.getElementById("app").innerHTML=h; animateNums();
 }
 /* PREMIUM POLISH */
