@@ -6,225 +6,183 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#16110c">
-<title>Mi Presupuesto</title>
+<title>Mi Dinero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Mi Presupuesto · mobile-first · tactile minimalism */
+/* Mi Dinero · single-screen expense tracker · bento · cash-aware */
 :root{
-  --ink:hsl(28 24% 9%);--ink-1:hsl(28 19% 13%);--ink-r:hsl(28 16% 17%);--ink-r2:hsl(28 15% 21%);--ink-s:hsl(28 30% 6%);
+  --ink:hsl(28 24% 9%);--ink-1:hsl(28 19% 12%);--ink-r:hsl(28 16% 16%);--ink-s:hsl(28 30% 6%);
   --cream:hsl(38 32% 92%);--soft:hsl(38 16% 64%);--mute:hsl(38 11% 46%);
-  --gold:hsl(40 56% 56%);--golds:hsl(40 56% 70%);--goldd:hsl(36 46% 36%);
-  --sage:hsl(150 32% 60%);--clay:hsl(8 58% 65%);
+  --gold:hsl(40 56% 56%);--golds:hsl(40 58% 72%);--goldd:hsl(36 46% 36%);
+  --sage:hsl(150 32% 60%);--clay:hsl(8 60% 64%);
   --hi:42 66% 96%;--sh:28 60% 3%;
-  --e1:0 1px 1px hsl(var(--sh)/.5),0 2px 5px hsl(var(--sh)/.4),0 8px 18px hsl(var(--sh)/.3),inset 0 1px 0 hsl(var(--hi)/.07);
-  --e2:0 2px 4px hsl(var(--sh)/.5),0 10px 24px hsl(var(--sh)/.45),0 24px 48px hsl(var(--sh)/.34),inset 0 1px 0 hsl(var(--hi)/.1);
+  --e1:0 1px 1px hsl(var(--sh)/.5),0 3px 7px hsl(var(--sh)/.4),0 8px 18px hsl(var(--sh)/.3),inset 0 1px 0 hsl(var(--hi)/.07);
   --sunk:inset 0 2px 6px hsl(var(--sh)/.75),inset 0 1px 2px hsl(var(--sh)/.6),inset 0 -1px 0 hsl(var(--hi)/.05);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{-webkit-text-size-adjust:100%}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--cream);min-height:100vh;line-height:1.45;letter-spacing:-.004em;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1;padding-bottom:108px;overflow-x:hidden}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60% at 50% 0%,hsl(40 40% 15%/.6),transparent 60%),var(--ink);color:var(--cream);line-height:1.4;letter-spacing:-.004em;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1;overflow-x:hidden}
 .grain{position:fixed;inset:0;z-index:99;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.wrap{max-width:520px;margin:0 auto;padding:0 16px}
+.wrap{max-width:520px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 14px calc(96px + env(safe-area-inset-bottom))}
 .tnum{font-variant-numeric:lining-nums tabular-nums}
 .serif{font-family:'Cormorant Garamond',Georgia,serif}
-.k{font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700}
+.k{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--gold)}
 /* HERO */
-.hero{position:relative;text-align:center;padding:calc(28px + env(safe-area-inset-top)) 22px 30px;margin:0 -16px 6px;
-  background:radial-gradient(120% 80% at 50% 0%,hsl(40 44% 18%/.85),transparent 62%),linear-gradient(180deg,var(--ink-1),var(--ink));overflow:hidden}
-.hero::after{content:"";position:absolute;left:50%;bottom:-1px;width:60%;height:1px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,hsl(40 56% 56%/.4),transparent)}
-.hero .hk{color:var(--gold);font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;font-weight:700}
-.hero .hn{font-family:'Cormorant Garamond';font-weight:700;font-size:4rem;line-height:.95;margin:7px 0 5px;letter-spacing:-.01em}
-.hero.pos .hn{color:transparent;background:linear-gradient(150deg,#ecd9a4 10%,#c9a052 60%,#9a7733);-webkit-background-clip:text;background-clip:text}
-.hero.zero .hn{color:var(--sage)}.hero.neg .hn{color:var(--clay)}
-.hero .hh{font-size:.82rem;color:var(--soft);font-weight:300;max-width:30ch;margin:0 auto;line-height:1.45}
-.hero .bank{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:.74rem;color:var(--soft);background:hsl(28 30% 6%/.6);padding:8px 15px;border-radius:20px;box-shadow:var(--sunk)}
-.hero .bank b{color:var(--cream);font-weight:600}
-.hero .ed{position:absolute;top:calc(20px + env(safe-area-inset-top));right:20px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:hsl(28 30% 6%/.5);box-shadow:var(--sunk);color:var(--soft);font-size:.8rem}
-/* SECTION TITLE */
-.st{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 12px}
-.st .t{font-family:'Cormorant Garamond';font-weight:600;font-size:1.5rem}
-.st .s{font-size:.72rem;color:var(--mute)}.st .s b{color:var(--golds)}
-/* LAPTOP */
-.lap{background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:20px;padding:16px;box-shadow:var(--e1);margin-bottom:6px}
-.lap .k{color:var(--gold);margin-bottom:4px;display:block}
-.opt{display:flex;align-items:center;gap:13px;padding:13px;border-radius:15px;background:var(--ink-s);box-shadow:var(--sunk);margin-top:10px;transition:transform .14s}
-.opt:active{transform:scale(.98)}
-.opt.on{background:linear-gradient(155deg,hsl(40 32% 24%),hsl(36 34% 15%));box-shadow:0 2px 8px hsl(var(--sh)/.4),inset 0 1px 0 hsl(var(--hi)/.14)}
-.opt .nom{flex:1;font-size:.9rem;color:var(--soft);font-weight:500}.opt.on .nom{color:var(--cream)}
-.opt .q{font-size:.7rem;color:var(--mute);margin-top:2px;font-weight:400}.opt .q b{color:var(--sage)}
-.opt .pr{font-family:'Cormorant Garamond';font-size:1.3rem;font-weight:600;color:var(--golds)}
-.cir{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:var(--ink);box-shadow:var(--sunk)}
-.opt.on .cir{background:linear-gradient(155deg,var(--golds),var(--goldd))}
-.cir svg{width:13px;height:13px;stroke:var(--ink);stroke-width:3.4;fill:none;opacity:0}.opt.on .cir svg{opacity:1}
-/* CATEGORY */
-.cat{background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:18px;padding:14px 15px;margin-bottom:11px;box-shadow:var(--e1);transition:box-shadow .25s}
-.cat.open{box-shadow:var(--e2)}
-.top{display:flex;align-items:center;gap:13px;cursor:pointer}
-.emo{width:42px;height:42px;border-radius:13px;flex-shrink:0;display:grid;place-items:center;font-size:1.3rem;background:var(--ink-s);box-shadow:var(--sunk)}
-.mid{flex:1;min-width:0}
-.nm{font-size:.96rem;color:var(--cream);font-weight:500;margin-bottom:7px}
-.trk{height:7px;border-radius:5px;background:var(--ink-s);box-shadow:var(--sunk);overflow:hidden}
-.fil{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--goldd),var(--golds));transition:width .5s cubic-bezier(.2,.7,.2,1)}
-.fil.over{background:linear-gradient(90deg,hsl(8 46% 42%),var(--clay))}
-.lbl{font-size:.68rem;color:var(--mute);margin-top:6px}
-.rt{text-align:right;flex-shrink:0}
-.av{font-family:'Cormorant Garamond';font-size:1.5rem;font-weight:600;color:var(--sage);line-height:1}
-.av.z{color:var(--mute)}.av.neg{color:var(--clay)}
-.avk{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-top:3px}
-.exp{max-height:0;overflow:hidden;transition:max-height .32s cubic-bezier(.2,.7,.2,1)}
-.cat.open .exp{max-height:240px}
-.expi{padding-top:14px;margin-top:13px;box-shadow:inset 0 1px 0 hsl(var(--hi)/.06)}
-.arow{display:flex;align-items:center;gap:10px;margin-bottom:11px}
-.arow label{flex:1;font-size:.78rem;color:var(--soft)}
-.arow input{width:120px;font-family:'Cormorant Garamond';font-weight:600;font-size:1.1rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:11px;padding:9px 13px;box-shadow:var(--sunk);text-align:right;outline:none}
-.eb{display:flex;gap:8px}
-.eb button{flex:1;font-family:inherit;font-size:.8rem;font-weight:600;padding:11px;border-radius:12px;border:none;cursor:pointer;background:var(--ink-s);color:var(--soft);box-shadow:var(--sunk)}
-.eb button.g{background:linear-gradient(155deg,hsl(40 32% 26%),hsl(36 34% 16%));color:var(--golds)}
-.eb button.d{color:var(--clay)}
-.addc{width:100%;text-align:center;font-size:.86rem;font-weight:600;color:var(--gold);padding:15px;border-radius:16px;border:1.5px dashed hsl(40 32% 28%);background:hsl(40 30% 14%/.3);cursor:pointer;margin-bottom:6px}
-/* PERSPECTIVA */
-.persp{background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:18px;padding:18px;box-shadow:var(--e1);margin-top:18px}
-.persp .k{color:var(--gold);margin-bottom:8px;display:block}
-.persp p{font-size:.85rem;color:var(--soft);font-weight:300;padding:7px 0 7px 17px;position:relative;line-height:1.5}
-.persp p::before{content:"";position:absolute;left:0;top:14px;width:6px;height:6px;border-radius:50%;background:linear-gradient(var(--golds),var(--goldd))}
-.persp b{color:var(--golds);font-weight:600}
-.foot{display:flex;gap:24px;justify-content:center;padding:18px 0 26px}
-.foot span{font-size:.74rem;color:var(--mute);font-weight:500}
-.foot span.g{color:var(--gold)}
+.hero{display:flex;align-items:center;gap:16px;background:linear-gradient(165deg,var(--ink-r),var(--ink-1));border-radius:26px;padding:20px 22px;box-shadow:var(--e1);margin-bottom:12px}
+.hero .hl{flex:1}
+.hero .hn{font-family:'Cormorant Garamond';font-weight:700;font-size:2.9rem;line-height:.95;margin:6px 0 3px;color:transparent;background:linear-gradient(150deg,#ecd9a4 10%,#c9a052 65%,#9a7733);-webkit-background-clip:text;background-clip:text}
+.hero .hs{font-size:.74rem;color:var(--mute)}
+.ring{position:relative;width:84px;height:84px;flex-shrink:0}
+.ring svg{transform:rotate(-90deg)}
+.ring .rc{position:absolute;inset:0;display:grid;place-items:center;font-family:'Cormorant Garamond';font-weight:700;font-size:1.15rem;color:var(--cream)}
+/* PILLS */
+.pills{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.pill{display:flex;align-items:center;gap:11px;background:linear-gradient(165deg,var(--ink-r),var(--ink-1));border-radius:20px;padding:14px 16px;box-shadow:var(--e1);cursor:pointer;transition:transform .14s}
+.pill:active{transform:scale(.97)}
+.pill .pe{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:1.15rem;background:var(--ink-s);box-shadow:var(--sunk);flex-shrink:0}
+.pill .pk{font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.pill .pv{font-family:'Cormorant Garamond';font-weight:700;font-size:1.35rem;color:var(--cream);line-height:1.05}
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.tile{position:relative;background:linear-gradient(165deg,var(--ink-r),var(--ink-1));border-radius:22px;padding:14px 12px 13px;box-shadow:var(--e1);cursor:pointer;text-align:center;transition:transform .14s,box-shadow .2s}
+.tile:active{transform:scale(.95)}
+.tile .te{font-size:1.5rem;line-height:1}
+.tile .tn{font-size:.7rem;color:var(--soft);font-weight:500;margin:7px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .ta{font-family:'Cormorant Garamond';font-weight:700;font-size:1.3rem;color:var(--cream);line-height:1}
+.tile .tb{height:5px;border-radius:4px;background:var(--ink-s);box-shadow:var(--sunk);overflow:hidden;margin-top:9px}
+.tile .tf{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--goldd),var(--golds))}
+.tile .tf.over{background:linear-gradient(90deg,hsl(8 46% 42%),var(--clay))}
+.tile.add{display:grid;place-items:center;border:1.5px dashed hsl(40 32% 26%);background:hsl(40 28% 13%/.3);box-shadow:none;min-height:96px}
+.tile.add span{font-size:1.6rem;color:var(--gold);font-weight:300}
+.tools{display:flex;gap:22px;justify-content:center;padding:20px 0 4px}
+.tools span{font-size:.74rem;color:var(--mute);font-weight:500}.tools span.g{color:var(--gold)}
 /* FAB */
-.fab{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;color:hsl(28 28% 11%);padding:17px 32px;border-radius:34px;background:linear-gradient(155deg,#ecd9a4,#c2a043);box-shadow:0 10px 30px hsl(var(--sh)/.6),0 2px 6px hsl(var(--sh)/.5),inset 0 1px 0 hsl(var(--hi)/.55);cursor:pointer;border:none;transition:transform .16s cubic-bezier(.34,1.56,.64,1)}
+.fab{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;color:hsl(28 28% 11%);padding:17px 34px;border-radius:34px;background:linear-gradient(155deg,#ecd9a4,#c2a043);box-shadow:0 12px 32px hsl(var(--sh)/.6),0 2px 6px hsl(var(--sh)/.5),inset 0 1px 0 hsl(var(--hi)/.55);cursor:pointer;border:none;transition:transform .16s cubic-bezier(.34,1.56,.64,1)}
 .fab:active{transform:translateX(-50%) scale(.93)}
-.fab svg{width:20px;height:20px;stroke:hsl(28 28% 11%);stroke-width:2.6;fill:none}
+.fab svg{width:20px;height:20px;stroke:hsl(28 28% 11%);stroke-width:2.7;fill:none}
 /* SHEET */
-.scrim{position:fixed;inset:0;z-index:70;background:hsl(var(--sh)/.66);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+.scrim{position:fixed;inset:0;z-index:70;background:hsl(var(--sh)/.68);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center}
 .scrim.on{display:flex}
-.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:26px 26px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.7,.2,1);max-height:88vh;overflow-y:auto}
+.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.7,.2,1);max-height:90vh;overflow-y:auto}
 .scrim.on .sheet{transform:translateY(0)}
-.grab{width:40px;height:5px;border-radius:3px;background:hsl(38 12% 40%/.5);margin:0 auto 16px}
-.sheet h3{font-family:'Cormorant Garamond';font-weight:600;font-size:1.7rem;margin-bottom:3px}
-.sheet .lead{font-size:.8rem;color:var(--mute);margin-bottom:16px;line-height:1.45}
-.amtin{width:100%;font-family:'Cormorant Garamond';font-weight:600;font-size:2.7rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:16px;padding:16px;box-shadow:var(--sunk);text-align:center;outline:none;margin-bottom:14px}
+.grab{width:42px;height:5px;border-radius:3px;background:hsl(38 12% 42%/.5);margin:0 auto 16px}
+.sheet h3{font-family:'Cormorant Garamond';font-weight:700;font-size:1.7rem;margin-bottom:3px}
+.sheet .lead{font-size:.79rem;color:var(--mute);margin-bottom:15px;line-height:1.45}
+.amtin{width:100%;font-family:'Cormorant Garamond';font-weight:700;font-size:2.9rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:17px;padding:15px;box-shadow:var(--sunk);text-align:center;outline:none;margin-bottom:13px}
 .amtin::placeholder{color:var(--mute)}
+.seg{display:flex;gap:8px;background:var(--ink-s);border-radius:14px;padding:5px;box-shadow:var(--sunk);margin-bottom:14px}
+.seg button{flex:1;font-family:inherit;font-size:.86rem;font-weight:600;padding:11px;border-radius:10px;border:none;cursor:pointer;background:none;color:var(--soft)}
+.seg button.on{background:linear-gradient(155deg,hsl(40 32% 26%),hsl(36 34% 16%));color:var(--cream);box-shadow:inset 0 1px 0 hsl(var(--hi)/.12)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{font-size:.84rem;font-weight:500;color:var(--soft);padding:10px 14px;border-radius:13px;background:var(--ink-s);box-shadow:var(--sunk);cursor:pointer}
+.chip.on{background:linear-gradient(155deg,hsl(40 32% 26%),hsl(36 34% 16%));color:var(--cream)}
 .fld{display:flex;gap:10px;margin-bottom:12px}
 .fld input{font-family:inherit;font-size:1rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:13px;padding:13px 15px;box-shadow:var(--sunk);outline:none}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.chip{font-size:.84rem;font-weight:500;color:var(--soft);padding:10px 15px;border-radius:13px;background:var(--ink-s);box-shadow:var(--sunk);cursor:pointer}
-.chip.on{background:linear-gradient(155deg,hsl(40 32% 26%),hsl(36 34% 16%));color:var(--cream)}
 .btn{width:100%;font-weight:700;font-size:1.05rem;color:hsl(28 28% 11%);padding:16px;border-radius:15px;border:none;background:linear-gradient(155deg,#ecd9a4,#c2a043);box-shadow:0 6px 18px hsl(var(--sh)/.4),inset 0 1px 0 hsl(var(--hi)/.55);cursor:pointer}
-.btn:active{transform:scale(.98)}.btn.ghost{background:none;box-shadow:none;color:var(--mute);font-weight:500;margin-top:4px}
-.crow{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-radius:13px;background:var(--ink-s);box-shadow:var(--sunk);margin-bottom:9px;cursor:pointer}
-.crow b{color:var(--sage);font-weight:600}
-.reveal{opacity:0;transform:translateY(14px);animation:rise .55s cubic-bezier(.2,.7,.2,1) forwards}
+.btn:active{transform:scale(.98)}.btn.ghost{background:none;box-shadow:none;color:var(--mute);font-weight:500;margin-top:2px}
+.btn.sec{background:var(--ink-s);color:var(--golds);box-shadow:var(--sunk);margin-top:9px}
+.mrow{display:flex;align-items:center;gap:10px;padding:9px 0;box-shadow:inset 0 -1px 0 hsl(var(--hi)/.05)}
+.mrow .me{font-size:1.2rem;width:28px;text-align:center}.mrow .mn{flex:1;font-size:.9rem;color:var(--cream)}
+.mrow input{width:90px;font-family:inherit;font-size:.9rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:9px;padding:8px 10px;box-shadow:var(--sunk);text-align:right;outline:none}
+.mrow .x{color:var(--clay);font-size:.78rem;padding:6px}
+.reveal{opacity:0;transform:translateY(12px);animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards}
 @keyframes rise{to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
 <div class="grain"></div>
-<div id="app"></div>
-<button class="fab" onclick="gastoSheet()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrar gasto</button>
+<div class="wrap" id="app"></div>
+<button class="fab" onclick="gastoSheet()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Gasto</button>
 <div class="scrim" id="scrim" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
 <script>
-const KEY="jeanBudget";
+const KEY="miDinero";
+const MES=new Date().toLocaleDateString('es-MX',{month:'long'});
 const DEFAULT={
-  v:3, income:157900, laptop:"no", laptopPagada:false,
-  opciones:{pro:['16" M5 Pro · 48GB · 1TB',69999], m5:['14" M5 · 32GB · 1TB',47999]},
+  v:4, bank:152000, cash:4000, lastAcc:"cash",
   cats:[
-    {e:"🏠",n:"Renta",a:11500,s:0},{e:"🛟",n:"Guardado / buffer",a:15000,s:0},
-    {e:"✈️",n:"Guadalajara",a:9000,s:0},{e:"🍱",n:"Meal plan",a:8100,s:0},
-    {e:"🛒",n:"Súper",a:3000,s:0},{e:"🌮",n:"Restaurantes",a:5000,s:0},
-    {e:"🏋️",n:"Gym",a:1400,s:0},{e:"🥗",n:"Nutrición",a:2000,s:0},{e:"🚗",n:"Transporte",a:3000,s:0},
+    {e:"🚬",n:"Fumar",s:1000,cap:1500},
+    {e:"🏠",n:"Casa / AC",s:0,cap:3000},
+    {e:"🌮",n:"Restaurantes",s:0,cap:5000},
+    {e:"🛒",n:"Súper",s:0,cap:3000},
+    {e:"⛽",n:"Transporte",s:0,cap:3000},
+    {e:"🍱",n:"Meal plan",s:0,cap:8100},
+    {e:"🏋️",n:"Gym",s:0,cap:1400},
+    {e:"🥗",n:"Nutrición",s:0,cap:2000},
+    {e:"✈️",n:"Guadalajara",s:0,cap:9000},
   ]
 };
-let S=load(), openIdx=-1, gCat=0;
-function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(!v||v.v!==3){ const o=JSON.parse(JSON.stringify(DEFAULT)); if(v&&v.cash)o.income=v.cash; return o;} return v; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); } }
+let S=load(), gCat=0, gAcc="cash";
+function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(!v||v.v!==4) return JSON.parse(JSON.stringify(DEFAULT)); return v; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); } }
 function save(){ localStorage.setItem(KEY,JSON.stringify(S)); }
 const m=n=>"$"+Math.round(n).toLocaleString("en-US");
-function lapCost(){ return S.laptop in S.opciones ? S.opciones[S.laptop][1] : 0; }
-function totA(){ return S.cats.reduce((x,c)=>x+(+c.a||0),0); }
-function totS(){ return S.cats.reduce((x,c)=>x+(+c.s||0),0); }
-function rta(){ return S.income - lapCost() - totA(); }
-function bank(){ return S.income - (S.laptopPagada?lapCost():0) - totS(); }
+const totS=()=>S.cats.reduce((x,c)=>x+(+c.s||0),0);
+const totCap=()=>S.cats.reduce((x,c)=>x+(+c.cap||0),0);
 
 function render(){
-  const r=rta();
+  const spent=totS(), cap=totCap(), pct=cap>0?Math.min(100,spent/cap*100):0;
+  const C=2*Math.PI*36, off=C*(1-pct/100);
   let h="";
   // HERO
-  const st=r===0?"zero":(r>0?"pos":"neg");
-  const hh=r===0?"✓ cada peso tiene un trabajo":(r>0?"sin trabajo aún · tócalos abajo para repartirlos a buffer, inversión o gastos":"repartiste de más · baja alguna asignación");
-  h+=`<div class="hero ${st} reveal"><div class="ed" onclick="editIncome()">✎</div>
-    <div class="hk">${r>=0?'Para repartir':'Te pasaste por'}</div>
-    <div class="hn tnum">${m(Math.abs(r))}</div>
-    <div class="hh">${hh}</div>
-    <div class="bank">En el banco: <b class="tnum">${m(bank())}</b> &nbsp;·&nbsp; +$40k si caen</div></div>`;
-  h+=`<div class="wrap">`;
-  // LAPTOP
-  h+=`<div class="st reveal" style="animation-delay:.04s"><span class="t">La laptop</span></div><div class="lap reveal" style="animation-delay:.04s">`;
-  for(const k in S.opciones){ const [nom,pr]=S.opciones[k], on=S.laptop===k, queda=S.income-pr-totA();
-    h+=`<div class="opt ${on?'on':''}" onclick="buy('${k}')"><div class="cir"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 6"/></svg></div>
-      <div style="flex:1"><div class="nom">${nom}</div><div class="q">${on?'comprada ✓':`si la compras, para repartir: <b>${m(queda)}</b>`}</div></div>
-      <div class="pr tnum">${m(pr)}</div></div>`; }
-  h+=`</div>`;
-  // CATEGORIES
-  h+=`<div class="st reveal" style="animation-delay:.08s"><span class="t">Categorías</span><span class="s">asignado <b>${m(totA())}</b> de ${m(S.income)}</span></div>`;
-  S.cats.forEach((c,i)=>{
-    const av=(+c.a||0)-(+c.s||0), pct=c.a>0?Math.min(100,c.s/c.a*100):0, over=c.s>c.a;
-    const avc=av<0?"neg":(av===0?"z":"");
-    h+=`<div class="cat ${i===openIdx?'open':''} reveal" style="animation-delay:${.1+i*.025}s">
-      <div class="top" onclick="toggle(${i})">
-        <div class="emo">${c.e||'•'}</div>
-        <div class="mid"><div class="nm">${c.n}</div><div class="trk"><div class="fil ${over?'over':''}" style="width:${pct}%"></div></div>
-          <div class="lbl">${m(c.s)} gastado · ${m(c.a)} plan</div></div>
-        <div class="rt"><div class="av ${avc} tnum">${m(av)}</div><div class="avk">queda</div></div></div>
-      <div class="exp"><div class="expi">
-        <div class="arow"><label>Asignado (su trabajo)</label><input type="number" inputmode="decimal" value="${c.a}" onchange="setA(${i},this.value)"></div>
-        <div class="eb"><button class="g" onclick="gastoSheet(${i})">+ gasto aquí</button>${over?`<button onclick="coverSheet(${i})">cubrir</button>`:''}<button class="d" onclick="delCat(${i})">borrar</button></div>
-      </div></div></div>`;
-  });
-  h+=`<button class="addc reveal" onclick="addCatSheet()">+ Agregar categoría</button>`;
-  // PERSPECTIVA
-  const pd=Math.round(69999/(3*250));
-  h+=`<div class="persp reveal"><span class="k">Perspectiva</span>
-    <p>Reparte lo que YA tienes, no lo que esperas. El dinero ocioso se gasta; el que tiene trabajo, no.</p>
-    <p>La Pro = <b>${m(pd)}/día</b> en 3 años. Es tu herramienta, no un lujo.</p>
-    <p>La culpa es el <b>peaje de subir</b>, no un veredicto. La compra es sana.</p></div>`;
-  h+=`<div class="foot"><span class="g" onclick="backup()">respaldar</span><span onclick="restore()">restaurar</span><span onclick="if(confirm('¿Reiniciar?')){localStorage.removeItem(KEY);S=load();openIdx=-1;render();}">reiniciar</span></div>`;
-  h+=`</div>`;
+  h+=`<div class="hero reveal"><div class="hl"><div class="k">Gastado en ${MES}</div>
+    <div class="hn tnum">${m(spent)}</div><div class="hs">de ${m(cap)} en topes</div></div>
+    <div class="ring"><svg width="84" height="84"><circle cx="42" cy="42" r="36" stroke="hsl(28 30% 6%)" stroke-width="7" fill="none"/>
+      <circle cx="42" cy="42" r="36" stroke="url(#g)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(36 46% 40%)"/><stop offset="1" stop-color="hsl(40 58% 72%)"/></linearGradient></defs></svg>
+      <div class="rc">${Math.round(pct)}%</div></div></div>`;
+  // PILLS
+  h+=`<div class="pills reveal" style="animation-delay:.04s">
+    <div class="pill" onclick="bankSheet()"><span class="pe">🏦</span><div><div class="pk">Banco</div><div class="pv tnum">${m(S.bank)}</div></div></div>
+    <div class="pill" onclick="cashSheet()"><span class="pe">💵</span><div><div class="pk">Efectivo</div><div class="pv tnum">${m(S.cash)}</div></div></div></div>`;
+  // GRID
+  h+=`<div class="grid reveal" style="animation-delay:.08s">`;
+  S.cats.forEach((c,i)=>{ const p=c.cap>0?Math.min(100,c.s/c.cap*100):0, over=c.s>c.cap&&c.cap>0;
+    h+=`<div class="tile" onclick="gastoSheet(${i})"><div class="te">${c.e||'•'}</div><div class="tn">${c.n}</div>
+      <div class="ta tnum">${m(c.s)}</div>${c.cap>0?`<div class="tb"><div class="tf ${over?'over':''}" style="width:${p}%"></div></div>`:''}</div>`; });
+  h+=`<div class="tile add" onclick="manageSheet()"><span>＋</span></div></div>`;
+  h+=`<div class="tools"><span class="g" onclick="manageSheet()">editar categorías</span><span onclick="backup()">respaldar</span><span onclick="restore()">restaurar</span></div>`;
   document.getElementById("app").innerHTML=h;
 }
-function toggle(i){ openIdx=openIdx===i?-1:i; render(); }
-function setA(i,v){ if(!isNaN(+v)){ S.cats[i].a=+v; save(); render(); } }
-function buy(k){ if(!S.laptopPagada)S.laptopPagada=true; S.laptop=S.laptop===k?"no":k; if(S.laptop==="no")S.laptopPagada=false; save(); render(); }
-function editIncome(){ const v=prompt("¿Cuánto tienes banqueado para repartir este mes?",S.income); if(v!==null&&!isNaN(+v)){S.income=+v;save();render();} }
-function delCat(i){ if(confirm(`¿Borrar "${S.cats[i].n}"?`)){S.cats.splice(i,1);openIdx=-1;save();render();} }
+/* ENTRY */
 function sh(html){ document.getElementById("sheet").innerHTML='<div class="grab"></div>'+html; document.getElementById("scrim").classList.add("on"); }
 function closeSheet(){ document.getElementById("scrim").classList.remove("on"); }
-function chips(sel){ return S.cats.map((c,i)=>`<span class="chip ${i===sel?'on':''}" onclick="gCat=${i};document.getElementById('chs').innerHTML=chips(${i})">${c.e||''} ${c.n}</span>`).join(""); }
-function gastoSheet(i){ gCat=(typeof i==="number")?i:0;
-  sh(`<h3>¿Cuánto gastaste?</h3><div class="lead">Se descuenta de tu banco y llena la barra de esa categoría.</div>
+function catChips(){ return S.cats.map((c,i)=>`<span class="chip ${i===gCat?'on':''}" onclick="gCat=${i};document.getElementById('chs').innerHTML=catChips()">${c.e||''} ${c.n}</span>`).join(""); }
+function gastoSheet(i){ gCat=(typeof i==="number")?i:0; gAcc=S.lastAcc||"cash";
+  sh(`<h3>¿Cuánto gastaste?</h3><div class="lead">Baja el saldo de la cuenta que elijas. No es retiro — es gasto real.</div>
     <input class="amtin tnum" id="gAmt" type="number" inputmode="decimal" placeholder="$0">
-    <div class="chips" id="chs">${chips(gCat)}</div><button class="btn" onclick="addGasto()">Guardar gasto</button><button class="btn ghost" onclick="closeSheet()">Cancelar</button>`);
+    <div class="seg"><button id="sgC" class="${gAcc==='cash'?'on':''}" onclick="gAcc='cash';segUp()">💵 Efectivo</button><button id="sgB" class="${gAcc==='bank'?'on':''}" onclick="gAcc='bank';segUp()">🏦 Banco</button></div>
+    <div class="chips" id="chs">${catChips()}</div>
+    <button class="btn" onclick="addGasto()">Guardar gasto</button><button class="btn ghost" onclick="closeSheet()">Cancelar</button>`);
   setTimeout(()=>{const e=document.getElementById("gAmt");if(e)e.focus();},320);
 }
-function addGasto(){ const v=+document.getElementById("gAmt").value; if(!v||v<=0){closeSheet();return;} S.cats[gCat].s=(+S.cats[gCat].s||0)+v; save(); closeSheet(); render(); }
-function addCatSheet(){ sh(`<h3>Nueva categoría</h3><div class="lead">Nombre y cuánto le asignas (su "trabajo" del mes).</div>
-  <div class="fld"><input id="cE" style="width:62px;text-align:center;font-size:1.4rem" placeholder="🙂"><input id="cN" style="flex:1" placeholder="Nombre"></div>
-  <div class="fld"><input id="cA" type="number" inputmode="decimal" style="flex:1" placeholder="Asignado $0"></div>
-  <button class="btn" onclick="addCat()">Crear categoría</button><button class="btn ghost" onclick="closeSheet()">Cancelar</button>`);
-  setTimeout(()=>{const e=document.getElementById("cN");if(e)e.focus();},320);
-}
-function addCat(){ const n=document.getElementById("cN").value.trim(); if(!n){closeSheet();return;}
-  S.cats.push({e:document.getElementById("cE").value.trim()||"•",n,a:+document.getElementById("cA").value||0,s:0}); save(); closeSheet(); render(); }
-function coverSheet(i){ const need=(+S.cats[i].s)-(+S.cats[i].a);
-  const sur=S.cats.map((c,j)=>({c,j})).filter(x=>x.j!==i&&((+x.c.a)-(+x.c.s))>0).sort((a,b)=>((b.c.a-b.c.s)-(a.c.a-a.c.s)));
-  sh(`<h3>Cubrir ${m(need)}</h3><div class="lead">Te pasaste en "${S.cats[i].n}". Mueve dinero asignado de otra categoría — sin drama, así se hace bien.</div>
-    ${sur.length?sur.map(x=>`<div class="crow" onclick="cover(${i},${x.j})"><span>${x.c.e||''} ${x.c.n}</span><b class="tnum">${m((+x.c.a)-(+x.c.s))} libre</b></div>`).join(""):'<div class="lead">No hay categorías con disponible. Sube tu ingreso o baja otra asignación.</div>'}
-    <button class="btn ghost" onclick="closeSheet()">Cerrar</button>`);
-}
-function cover(i,j){ const need=(+S.cats[i].s)-(+S.cats[i].a), av=(+S.cats[j].a)-(+S.cats[j].s), mv=Math.min(need,av); S.cats[j].a-=mv; S.cats[i].a+=mv; save(); closeSheet(); render(); }
-function backup(){ const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="presupuesto-respaldo.json"; document.body.appendChild(a); a.click(); a.remove(); }
-function restore(){ const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json"; inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d&&d.cats){S=d;save();openIdx=-1;render();}else alert("Archivo inválido");}catch(x){alert("No se pudo leer");}};r.readAsText(f);}; inp.click(); }
+function segUp(){ document.getElementById("sgC").className=gAcc==='cash'?'on':''; document.getElementById("sgB").className=gAcc==='bank'?'on':''; }
+function addGasto(){ const v=+document.getElementById("gAmt").value; if(!v||v<=0){closeSheet();return;}
+  S.cats[gCat].s=(+S.cats[gCat].s||0)+v; if(gAcc==='bank')S.bank-=v; else S.cash-=v; S.lastAcc=gAcc; save(); closeSheet(); render(); }
+/* ACCOUNTS */
+function bankSheet(){ sh(`<h3>Banco · ${m(S.bank)}</h3><div class="lead">Retirar pasa dinero a tu efectivo (no es un gasto). O ajusta el saldo.</div>
+  <div class="fld"><input id="wd" type="number" inputmode="decimal" style="flex:1" placeholder="Retirar a efectivo $"></div>
+  <button class="btn" onclick="withdraw()">Retirar a efectivo</button>
+  <div class="fld" style="margin-top:14px"><input id="bb" type="number" inputmode="decimal" style="flex:1" value="${S.bank}" placeholder="Saldo banco"></div>
+  <button class="btn sec" onclick="setBank()">Ajustar saldo banco</button><button class="btn ghost" onclick="closeSheet()">Cerrar</button>`); }
+function withdraw(){ const v=+document.getElementById("wd").value; if(v>0){ S.bank-=v; S.cash+=v; S.lastAcc="cash"; save(); } closeSheet(); render(); }
+function setBank(){ const v=+document.getElementById("bb").value; if(!isNaN(v)){S.bank=v;save();} closeSheet(); render(); }
+function cashSheet(){ sh(`<h3>Efectivo · ${m(S.cash)}</h3><div class="lead">Ajusta tu efectivo en mano (para cuadrar con tu cartera real).</div>
+  <div class="fld"><input id="cc" type="number" inputmode="decimal" style="flex:1" value="${S.cash}" placeholder="Efectivo en mano"></div>
+  <button class="btn" onclick="setCash()">Ajustar efectivo</button><button class="btn ghost" onclick="closeSheet()">Cerrar</button>`); }
+function setCash(){ const v=+document.getElementById("cc").value; if(!isNaN(v)){S.cash=v;save();} closeSheet(); render(); }
+/* MANAGE CATEGORIES */
+function manageSheet(){ sh(`<h3>Categorías</h3><div class="lead">Edita el nombre, el emoji y el tope (opcional). El tope solo pinta la barra, no bloquea.</div>
+  ${S.cats.map((c,i)=>`<div class="mrow"><input class="me" style="width:42px;text-align:center;font-size:1.1rem;padding:6px" value="${c.e||''}" onchange="S.cats[${i}].e=this.value;save()">
+    <input class="mn" style="flex:1;text-align:left" value="${c.n}" onchange="S.cats[${i}].n=this.value;save()">
+    <input type="number" inputmode="decimal" value="${c.cap||0}" onchange="S.cats[${i}].cap=+this.value;save()">
+    <span class="x" onclick="if(confirm('¿Borrar ${c.n}?')){S.cats.splice(${i},1);save();manageSheet();render();}">✕</span></div>`).join("")}
+  <button class="btn sec" onclick="addCatRow()">+ Agregar categoría</button>
+  <button class="btn" onclick="closeSheet();render()">Listo</button>`); }
+function addCatRow(){ S.cats.push({e:"🙂",n:"Nueva",s:0,cap:0}); save(); manageSheet(); }
+/* BACKUP */
+function backup(){ const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="mi-dinero-respaldo.json"; document.body.appendChild(a); a.click(); a.remove(); }
+function restore(){ const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json"; inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d&&d.cats){S=d;save();render();}else alert("Archivo inválido");}catch(x){alert("No se pudo leer");}};r.readAsText(f);}; inp.click(); }
 render();
 </script>
 </body>
