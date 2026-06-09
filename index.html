@@ -6,6 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#16110c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Dinero">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Mi Dinero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,7 +72,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 .tile .tf.over{background:linear-gradient(90deg,hsl(8 46% 42%),var(--clay))}
 .tile.add{display:grid;place-items:center;border:1.5px dashed hsl(40 32% 26%);background:hsl(40 28% 13%/.3);box-shadow:none;min-height:96px}
 .tile.add span{font-size:1.6rem;color:var(--gold);font-weight:300}
-.tools{display:flex;gap:22px;justify-content:center;padding:20px 0 4px}
+.tools{display:flex;flex-wrap:wrap;gap:9px 18px;justify-content:center;padding:20px 0 4px}
 .tools span{font-size:.74rem;color:var(--mute);font-weight:500}.tools span.g{color:var(--gold)}
 /* FAB */
 .fab{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;color:hsl(28 28% 11%);padding:17px 34px;border-radius:34px;background:linear-gradient(155deg,#ecd9a4,#c2a043);box-shadow:0 12px 32px hsl(var(--sh)/.6),0 2px 6px hsl(var(--sh)/.5),inset 0 1px 0 hsl(var(--hi)/.55);cursor:pointer;border:none;transition:transform .16s cubic-bezier(.34,1.56,.64,1)}
@@ -122,8 +126,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 const KEY="miDinero";
 const MES=new Date().toLocaleDateString('es-MX',{month:'long'});
 const DEFAULT={
-  v:5, bank:152000, cash:4000, lastAcc:"cash", laptop:"no", laptopPagada:false,
+  v:6, bank:152000, cash:4000, lastAcc:"cash", laptop:"no", laptopPagada:false,
   opciones:{pro:['16" M5 Pro · 48GB · 1TB',69999], m5:['14" M5 · 32GB · 1TB',47999]},
+  tx:[{a:1000,c:0,acc:"cash",t:0}],
   cats:[
     {e:"🚬",n:"Fumar",s:1000,cap:1500},
     {e:"🏠",n:"Casa / AC",s:0,cap:3000},
@@ -137,7 +142,7 @@ const DEFAULT={
   ]
 };
 let S=load(), gCat=0, gAcc="cash";
-function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(!v||(v.v!==4&&v.v!==5)) return JSON.parse(JSON.stringify(DEFAULT)); if(!v.opciones){ v.laptop="no"; v.laptopPagada=false; v.opciones={pro:['16" M5 Pro · 48GB · 1TB',69999], m5:['14" M5 · 32GB · 1TB',47999]}; v.v=5; } return v; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); } }
+function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(!v||(v.v!==4&&v.v!==5&&v.v!==6)) return JSON.parse(JSON.stringify(DEFAULT)); if(!v.opciones){ v.laptop="no"; v.laptopPagada=false; v.opciones={pro:['16" M5 Pro · 48GB · 1TB',69999], m5:['14" M5 · 32GB · 1TB',47999]}; } if(!v.tx)v.tx=[]; v.v=6; return v; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); } }
 function save(){ localStorage.setItem(KEY,JSON.stringify(S)); }
 const m=n=>"$"+Math.round(n).toLocaleString("en-US");
 const totS=()=>S.cats.reduce((x,c)=>x+(+c.s||0),0);
@@ -172,7 +177,7 @@ function render(){
     h+=`<div class="tile" onclick="gastoSheet(${i})"><div class="te">${c.e||'•'}</div><div class="tn">${c.n}</div>
       <div class="ta tnum">${m(c.s)}</div>${c.cap>0?`<div class="tb"><div class="tf ${over?'over':''}" style="width:${p}%"></div></div>`:''}</div>`; });
   h+=`<div class="tile add" onclick="manageSheet()"><span>＋</span></div></div>`;
-  h+=`<div class="tools"><span class="g" onclick="manageSheet()">editar categorías</span><span onclick="backup()">respaldar</span><span onclick="restore()">restaurar</span></div>`;
+  h+=`<div class="tools"><span class="g" onclick="movimientos()">movimientos</span><span onclick="manageSheet()">categorías</span><span onclick="backup()">respaldar</span><span onclick="restore()">restaurar</span><span onclick="if(confirm('¿Reiniciar todo a cero?')){localStorage.removeItem(KEY);S=load();render();}">reiniciar</span></div>`;
   document.getElementById("app").innerHTML=h; animateNums();
 }
 /* PREMIUM POLISH */
@@ -201,8 +206,18 @@ function qa(a){ const e=document.getElementById("gAmt"); e.value=(+e.value||0)+a
 function segUp(){ document.getElementById("sgC").className=gAcc==='cash'?'on':''; document.getElementById("sgB").className=gAcc==='bank'?'on':''; haptic(6); }
 function addGasto(){ const v=+document.getElementById("gAmt").value; if(!v||v<=0){closeSheet();return;}
   const i=gCat, acc=gAcc; S.cats[i].s=(+S.cats[i].s||0)+v; if(acc==='bank')S.bank-=v; else S.cash-=v; S.lastAcc=acc; S.lastCat=i;
-  lastAction=()=>{ S.cats[i].s-=v; if(acc==='bank')S.bank+=v; else S.cash+=v; };
+  S.tx.push({a:v,c:i,acc,t:Date.now()});
+  lastAction=()=>{ S.cats[i].s-=v; if(acc==='bank')S.bank+=v; else S.cash+=v; S.tx.pop(); };
   save(); closeSheet(); render(); haptic(S.cats[i].cap>0&&S.cats[i].s>S.cats[i].cap?[0,45]:12); snack(`${m(v)} en ${S.cats[i].n}`); }
+function movimientos(){
+  const list=S.tx.map((t,idx)=>({t,idx})).reverse();
+  sh(`<h3>Movimientos</h3><div class="lead">Toca la ✕ para quitar un gasto — el dinero regresa a su cuenta.</div>
+    ${list.length? list.map(o=>{ const c=S.cats[o.t.c]||{e:'•',n:'(categoría borrada)'};
+      return `<div class="mrow"><span class="me">${c.e||'•'}</span><div class="mn">${c.n}<div style="font-size:.64rem;color:var(--mute)">${o.t.acc==='bank'?'banco':'efectivo'}</div></div><span class="tnum" style="color:var(--cream);font-weight:600;margin-right:8px">${m(o.t.a)}</span><span class="x" onclick="delTx(${o.idx})">✕</span></div>`; }).join("")
+      : '<div class="lead" style="text-align:center;padding:18px 0">Aún no hay gastos registrados.</div>'}
+    <button class="btn" onclick="closeSheet()">Cerrar</button>`);
+}
+function delTx(idx){ const t=S.tx[idx]; if(!t)return; if(S.cats[t.c])S.cats[t.c].s-=t.a; if(t.acc==='bank')S.bank+=t.a; else S.cash+=t.a; S.tx.splice(idx,1); save(); haptic(10); movimientos(); render(); }
 function buy(k){ if(S.laptopPagada){ if(S.laptop===k){ S.bank+=S.opciones[k][1]; S.laptopPagada=false; S.laptop="no"; lastAction=null; } } else { const pr=S.opciones[k][1]; S.bank-=pr; S.laptopPagada=true; S.laptop=k; lastAction=()=>{S.bank+=pr;S.laptopPagada=false;S.laptop="no";}; haptic([0,45]); snack(`Compraste la ${k==='pro'?'16" Pro':'14" M5'}`); } save(); render(); }
 /* ACCOUNTS */
 function bankSheet(){ sh(`<h3>Banco · ${m(S.bank)}</h3><div class="lead">Retirar pasa dinero a tu efectivo (no es un gasto). O ajusta el saldo.</div>
@@ -252,6 +267,7 @@ function initSheetDrag(){
   window.addEventListener('touchend',end); window.addEventListener('touchcancel',end);
 }
 initSheetDrag();
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 render();
 </script>
 </body>
