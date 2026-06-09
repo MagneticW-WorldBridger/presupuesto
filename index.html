@@ -81,10 +81,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 /* SHEET */
 .scrim{position:fixed;inset:0;z-index:70;background:hsl(var(--sh)/.68);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center}
 .scrim.on{display:flex}
-.sheet{width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;overscroll-behavior:contain;will-change:transform}
+.sheet{position:relative;width:100%;max-width:520px;background:linear-gradient(180deg,var(--ink-r),var(--ink-1));border-radius:28px 28px 0 0;padding:12px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 50px hsl(var(--sh)/.65);transform:translateY(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;overscroll-behavior:contain;will-change:transform}
 .scrim.on .sheet{transform:translateY(0)}
 .grab{width:46px;height:5px;border-radius:3px;background:hsl(38 12% 42%/.55);margin:0 auto 14px;touch-action:none;padding:8px 40px;background-clip:content-box;box-sizing:content-box}
 .sheet.dragging{transition:none;-webkit-user-select:none;user-select:none}
+.shx{position:absolute;top:13px;right:16px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--ink-s);box-shadow:var(--sunk);color:var(--soft);font-size:.78rem;z-index:3;cursor:pointer}
 .sheet h3{font-family:'Cormorant Garamond';font-weight:700;font-size:1.7rem;margin-bottom:3px}
 .sheet .lead{font-size:.79rem;color:var(--mute);margin-bottom:15px;line-height:1.45}
 .amtin{width:100%;font-family:'Cormorant Garamond';font-weight:700;font-size:2.9rem;color:var(--cream);background:var(--ink-s);border:none;border-radius:17px;padding:15px;box-shadow:var(--sunk);text-align:center;outline:none;margin-bottom:13px}
@@ -174,14 +175,14 @@ function render(){
   // GRID
   h+=`<div class="grid reveal" style="animation-delay:.08s">`;
   S.cats.forEach((c,i)=>{ const p=c.cap>0?Math.min(100,c.s/c.cap*100):0, over=c.s>c.cap&&c.cap>0;
-    h+=`<div class="tile" onclick="gastoSheet(${i})"><div class="te">${c.e||'•'}</div><div class="tn">${c.n}</div>
+    h+=`<div class="tile" onclick="catSheet(${i})"><div class="te">${c.e||'•'}</div><div class="tn">${c.n}</div>
       <div class="ta tnum">${m(c.s)}</div>${c.cap>0?`<div class="tb"><div class="tf ${over?'over':''}" style="width:${p}%"></div></div>`:''}</div>`; });
   h+=`<div class="tile add" onclick="manageSheet()"><span>＋</span></div></div>`;
   h+=`<div class="tools"><span class="g" onclick="movimientos()">movimientos</span><span onclick="manageSheet()">categorías</span><span onclick="if(confirm('¿Reiniciar todo a cero?')){localStorage.removeItem(KEY);S=load();render();}">reiniciar</span></div>`;
   document.getElementById("app").innerHTML=h; animateNums();
 }
 /* PREMIUM POLISH */
-let PREV={spent:null,bank:null,cash:null}, lastAction=null, snackT=null;
+let PREV={spent:null,bank:null,cash:null}, lastAction=null, snackT=null, reopen=null;
 const RM=()=>window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function haptic(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
 function countUp(el,from,to,dur){ if(RM()||from===to){ el.textContent=m(to); return; } const s=performance.now(),ez=t=>1-Math.pow(1-t,3); function tk(ts){ const t=Math.min((ts-s)/dur,1); el.textContent=m(from+(to-from)*ez(t)); if(t<1)requestAnimationFrame(tk); else el.textContent=m(to);} requestAnimationFrame(tk); }
@@ -190,7 +191,7 @@ function animateNums(){ const tg={spent:totS(),bank:S.bank,cash:S.cash}; for(con
 function snack(msg){ const s=document.getElementById('snack'); s.querySelector('.sm').textContent=msg; s.classList.add('on'); clearTimeout(snackT); snackT=setTimeout(()=>s.classList.remove('on'),5000); }
 function undo(){ if(lastAction){ lastAction(); lastAction=null; save(); render(); } document.getElementById('snack').classList.remove('on'); haptic(10); }
 /* ENTRY */
-function sh(html){ document.getElementById("sheet").innerHTML='<div class="grab"></div>'+html; document.getElementById("scrim").classList.add("on"); }
+function sh(html){ document.getElementById("sheet").innerHTML='<div class="grab"></div><div class="shx" onclick="closeSheet()">✕</div>'+html; document.getElementById("scrim").classList.add("on"); }
 function closeSheet(){ document.getElementById("scrim").classList.remove("on"); const s=document.getElementById('sheet'); s.classList.remove('dragging'); s.style.transform=''; }
 function catChips(){ return S.cats.map((c,i)=>`<span class="chip ${i===gCat?'on':''}" onclick="gCat=${i};document.getElementById('chs').innerHTML=catChips()">${c.e||''} ${c.n}</span>`).join(""); }
 function gastoSheet(i){ gCat=(typeof i==="number")?i:(S.lastCat||0); gAcc=S.lastAcc||"cash";
@@ -209,15 +210,28 @@ function addGasto(){ const v=+document.getElementById("gAmt").value; if(!v||v<=0
   S.tx.push({a:v,c:i,acc,t:Date.now()});
   lastAction=()=>{ S.cats[i].s-=v; if(acc==='bank')S.bank+=v; else S.cash+=v; S.tx.pop(); };
   save(); closeSheet(); render(); haptic(S.cats[i].cap>0&&S.cats[i].s>S.cats[i].cap?[0,45]:12); snack(`${m(v)} en ${S.cats[i].n}`); }
-function movimientos(){
+function catSheet(i){ const c=S.cats[i]; if(!c)return; gAcc=S.lastAcc||"cash"; reopen=()=>catSheet(i);
+  const mov=S.tx.map((t,idx)=>({t,idx})).filter(o=>o.t.c===i).reverse();
+  sh(`<h3>${c.e||''} ${c.n}</h3><div class="lead">Gastado ${m(c.s)}${c.cap>0?' de '+m(c.cap):''}. Agrega o quita movimientos aquí.</div>
+    <input class="amtin tnum" id="gAmt" type="number" inputmode="decimal" placeholder="$0">
+    <div class="qa">${[100,200,500,1000].map(a=>`<span class="qchip" onclick="qa(${a})">+$${a}</span>`).join("")}</div>
+    <div class="seg"><button id="sgC" class="${gAcc==='cash'?'on':''}" onclick="gAcc='cash';segUp()">💵 Efectivo</button><button id="sgB" class="${gAcc==='bank'?'on':''}" onclick="gAcc='bank';segUp()">🏦 Banco</button></div>
+    <button class="btn" onclick="addToCat(${i})">Agregar gasto</button>
+    <div class="k" style="margin:22px 0 8px">Movimientos${mov.length?' ('+mov.length+')':''}</div>
+    ${mov.length? mov.map(o=>`<div class="mrow"><div class="mn">${o.t.acc==='bank'?'🏦 banco':'💵 efectivo'}</div><span class="tnum" style="color:var(--cream);font-weight:600;margin-right:10px">${m(o.t.a)}</span><span class="x" onclick="delTx(${o.idx})">✕</span></div>`).join("")
+      : '<div class="lead" style="text-align:center;padding:12px 0">Sin movimientos aún.</div>'}`);
+}
+function addToCat(i){ const v=+document.getElementById("gAmt").value; if(!v||v<=0)return; const acc=gAcc;
+  S.cats[i].s=(+S.cats[i].s||0)+v; if(acc==='bank')S.bank-=v; else S.cash-=v; S.lastAcc=acc; S.lastCat=i; S.tx.push({a:v,c:i,acc,t:Date.now()});
+  save(); haptic(12); snack(`${m(v)} en ${S.cats[i].n}`); render(); catSheet(i); }
+function movimientos(){ reopen=()=>movimientos();
   const list=S.tx.map((t,idx)=>({t,idx})).reverse();
-  sh(`<h3>Movimientos</h3><div class="lead">Toca la ✕ para quitar un gasto — el dinero regresa a su cuenta.</div>
+  sh(`<h3>Todos los movimientos</h3><div class="lead">Histórico completo. Toca la ✕ para quitar un gasto — el dinero regresa a su cuenta.</div>
     ${list.length? list.map(o=>{ const c=S.cats[o.t.c]||{e:'•',n:'(categoría borrada)'};
       return `<div class="mrow"><span class="me">${c.e||'•'}</span><div class="mn">${c.n}<div style="font-size:.64rem;color:var(--mute)">${o.t.acc==='bank'?'banco':'efectivo'}</div></div><span class="tnum" style="color:var(--cream);font-weight:600;margin-right:8px">${m(o.t.a)}</span><span class="x" onclick="delTx(${o.idx})">✕</span></div>`; }).join("")
-      : '<div class="lead" style="text-align:center;padding:18px 0">Aún no hay gastos registrados.</div>'}
-    <button class="btn" onclick="closeSheet()">Cerrar</button>`);
+      : '<div class="lead" style="text-align:center;padding:18px 0">Aún no hay gastos registrados.</div>'}`);
 }
-function delTx(idx){ const t=S.tx[idx]; if(!t)return; if(S.cats[t.c])S.cats[t.c].s-=t.a; if(t.acc==='bank')S.bank+=t.a; else S.cash+=t.a; S.tx.splice(idx,1); save(); haptic(10); movimientos(); render(); }
+function delTx(idx){ const t=S.tx[idx]; if(!t)return; if(S.cats[t.c])S.cats[t.c].s-=t.a; if(t.acc==='bank')S.bank+=t.a; else S.cash+=t.a; S.tx.splice(idx,1); save(); haptic(10); render(); if(reopen)reopen(); }
 function buy(k){ if(S.laptopPagada){ if(S.laptop===k){ S.bank+=S.opciones[k][1]; S.laptopPagada=false; S.laptop="no"; lastAction=null; } } else { const pr=S.opciones[k][1]; S.bank-=pr; S.laptopPagada=true; S.laptop=k; lastAction=()=>{S.bank+=pr;S.laptopPagada=false;S.laptop="no";}; haptic([0,45]); snack(`Compraste la ${k==='pro'?'16" Pro':'14" M5'}`); } save(); render(); }
 /* ACCOUNTS */
 function bankSheet(){ sh(`<h3>Banco · ${m(S.bank)}</h3><div class="lead">Retirar pasa dinero a tu efectivo (no es un gasto). O ajusta el saldo.</div>
