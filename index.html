@@ -44,6 +44,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 .pill .pe{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:1.15rem;background:var(--ink-s);box-shadow:var(--sunk);flex-shrink:0}
 .pill .pk{font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
 .pill .pv{font-family:'Cormorant Garamond';font-weight:700;font-size:1.35rem;color:var(--cream);line-height:1.05}
+/* LAPTOP */
+.lapc{background:linear-gradient(165deg,var(--ink-r),var(--ink-1));border-radius:22px;padding:14px 16px;box-shadow:var(--e1);margin-bottom:14px}
+.lapc .k{display:block;margin-bottom:5px}
+.lopt{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:14px;background:var(--ink-s);box-shadow:var(--sunk);margin-top:9px;cursor:pointer;transition:transform .14s}
+.lopt:active{transform:scale(.98)}
+.lopt.on{background:linear-gradient(155deg,hsl(40 32% 24%),hsl(36 34% 15%));box-shadow:inset 0 1px 0 hsl(var(--hi)/.14)}
+.lopt .ln{flex:1;font-size:.85rem;color:var(--soft);font-weight:500}.lopt.on .ln{color:var(--cream)}
+.lopt .lq{font-size:.68rem;color:var(--mute);margin-top:2px}.lopt .lq b{color:var(--sage);font-weight:600}
+.lopt .lp{font-family:'Cormorant Garamond';font-weight:700;font-size:1.2rem;color:var(--golds)}
+.lcir{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:var(--ink);box-shadow:var(--sunk)}
+.lopt.on .lcir{background:linear-gradient(155deg,var(--golds),var(--goldd))}
+.lcir svg{width:12px;height:12px;stroke:var(--ink);stroke-width:3.4;fill:none;opacity:0}.lopt.on .lcir svg{opacity:1}
 /* GRID */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
 .tile{position:relative;background:linear-gradient(165deg,var(--ink-r),var(--ink-1));border-radius:22px;padding:14px 12px 13px;box-shadow:var(--e1);cursor:pointer;text-align:center;transition:transform .14s,box-shadow .2s}
@@ -100,7 +112,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(120% 60
 const KEY="miDinero";
 const MES=new Date().toLocaleDateString('es-MX',{month:'long'});
 const DEFAULT={
-  v:4, bank:152000, cash:4000, lastAcc:"cash",
+  v:5, bank:152000, cash:4000, lastAcc:"cash", laptop:"no", laptopPagada:false,
+  opciones:{pro:['16" M5 Pro · 48GB · 1TB',69999], m5:['14" M5 · 32GB · 1TB',47999]},
   cats:[
     {e:"🚬",n:"Fumar",s:1000,cap:1500},
     {e:"🏠",n:"Casa / AC",s:0,cap:3000},
@@ -114,7 +127,7 @@ const DEFAULT={
   ]
 };
 let S=load(), gCat=0, gAcc="cash";
-function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(!v||v.v!==4) return JSON.parse(JSON.stringify(DEFAULT)); return v; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); } }
+function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)||"null"); if(!v||(v.v!==4&&v.v!==5)) return JSON.parse(JSON.stringify(DEFAULT)); if(!v.opciones){ v.laptop="no"; v.laptopPagada=false; v.opciones={pro:['16" M5 Pro · 48GB · 1TB',69999], m5:['14" M5 · 32GB · 1TB',47999]}; v.v=5; } return v; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT)); } }
 function save(){ localStorage.setItem(KEY,JSON.stringify(S)); }
 const m=n=>"$"+Math.round(n).toLocaleString("en-US");
 const totS=()=>S.cats.reduce((x,c)=>x+(+c.s||0),0);
@@ -126,11 +139,19 @@ function render(){
   let h="";
   // HERO
   h+=`<div class="hero reveal"><div class="hl"><div class="k">Gastado en ${MES}</div>
-    <div class="hn tnum">${m(spent)}</div><div class="hs">de ${m(cap)} en topes</div></div>
+    <div class="hn tnum">${m(spent)}</div><div class="hs">Tienes ${m(S.bank+S.cash)} en total</div></div>
     <div class="ring"><svg width="84" height="84"><circle cx="42" cy="42" r="36" stroke="hsl(28 30% 6%)" stroke-width="7" fill="none"/>
       <circle cx="42" cy="42" r="36" stroke="url(#g)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
       <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(36 46% 40%)"/><stop offset="1" stop-color="hsl(40 58% 72%)"/></linearGradient></defs></svg>
       <div class="rc">${Math.round(pct)}%</div></div></div>`;
+  // LAPTOP
+  const tot=S.bank+S.cash;
+  h+=`<div class="lapc reveal" style="animation-delay:.03s"><span class="k">La laptop · la decisión</span>`;
+  for(const k in S.opciones){ const [nom,pr]=S.opciones[k], on=S.laptopPagada&&S.laptop===k;
+    h+=`<div class="lopt ${on?'on':''}" onclick="buy('${k}')"><div class="lcir"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 6"/></svg></div>
+      <div style="flex:1"><div class="ln">${nom}</div><div class="lq">${on?'comprada ✓ · salió del banco':'si la compras te quedan <b>'+m(tot-pr)+'</b>'}</div></div>
+      <div class="lp tnum">${m(pr)}</div></div>`; }
+  h+=`</div>`;
   // PILLS
   h+=`<div class="pills reveal" style="animation-delay:.04s">
     <div class="pill" onclick="bankSheet()"><span class="pe">🏦</span><div><div class="pk">Banco</div><div class="pv tnum">${m(S.bank)}</div></div></div>
@@ -159,6 +180,7 @@ function gastoSheet(i){ gCat=(typeof i==="number")?i:0; gAcc=S.lastAcc||"cash";
 function segUp(){ document.getElementById("sgC").className=gAcc==='cash'?'on':''; document.getElementById("sgB").className=gAcc==='bank'?'on':''; }
 function addGasto(){ const v=+document.getElementById("gAmt").value; if(!v||v<=0){closeSheet();return;}
   S.cats[gCat].s=(+S.cats[gCat].s||0)+v; if(gAcc==='bank')S.bank-=v; else S.cash-=v; S.lastAcc=gAcc; save(); closeSheet(); render(); }
+function buy(k){ if(S.laptopPagada){ if(S.laptop===k){ S.bank+=S.opciones[k][1]; S.laptopPagada=false; S.laptop="no"; } } else { S.bank-=S.opciones[k][1]; S.laptopPagada=true; S.laptop=k; } save(); render(); }
 /* ACCOUNTS */
 function bankSheet(){ sh(`<h3>Banco · ${m(S.bank)}</h3><div class="lead">Retirar pasa dinero a tu efectivo (no es un gasto). O ajusta el saldo.</div>
   <div class="fld"><input id="wd" type="number" inputmode="decimal" style="flex:1" placeholder="Retirar a efectivo $"></div>
